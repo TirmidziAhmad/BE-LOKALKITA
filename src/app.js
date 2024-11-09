@@ -1,19 +1,26 @@
 const express = require("express");
-const dotenv = require("dotenv").config();
+const cors = require("cors");
+require("dotenv").config();
 
-const userRouter = require("./routes/userRouter");
-const productRouter = require("./routes/productRouter");
+const { userRoutes, productRoutes, cartRoutes } = require("./routes");
+const { authMiddleware, errorHandler } = require("./middleware");
 
 const app = express();
-dotenv;
-const PORT = process.env.PORT || 3001;
 
-app.use("/users", userRouter);
-app.use("/products", productRouter);
+// Middleware
+app.use(cors());
+app.use(express.json());
 
-app.use("*", (req, res) => {
-  res.status(404).json({ message: "Route not found" });
-});
+// Routes with optional authentication
+app.use("/api/users", userRoutes);
+app.use("/api/products", productRoutes);
+app.use("/api/cart", authMiddleware, cartRoutes);
+
+// Global error handler
+// app.use(errorHandler);
+
+const PORT = process.env.PORT || 3000;
+
 app.listen(PORT, () => {
-  console.log(`My first Express app - listening on port ${PORT}! `);
+  console.log(`Server running on port ${PORT}`);
 });
